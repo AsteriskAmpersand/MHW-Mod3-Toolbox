@@ -14,6 +14,26 @@ Created on Mon Oct 28 23:04:20 2019
 """
 import bpy
 
+def execute_operator(self, context):
+    if self.add_rig != "pass":
+        eval('bpy.ops.' + self.add_rig + '()')
+    
+class ImportPremade(bpy.types.PropertyGroup):
+    mode_options = [
+        ("pass", "Select Rig", '', 'EMPTY_DATA', 0),
+        ("mod_tools.add_fplayer_rig", "Player Female Rig", "Statyk's Female Player Rig", 'POSE_DATA', 1),
+        ("mod_tools.add_mplayer_rig", "Player Male Rig", "Statyk's Male Player Rig", 'POSE_DATA', 2),
+        #("mesh.primitive_cube_add", "Cube", '', 'MESH_CUBE', 1),
+    ]
+
+    add_rig = bpy.props.EnumProperty(
+        name = "Add Rig",
+        items=mode_options,
+        description="Imports the selected rigging setup",
+        default="pass",
+        update=execute_operator
+    )
+
 class ModTools(bpy.types.Panel):
     bl_category = "MHW Physics"
     bl_idname = "panel.mhw_mod"
@@ -43,7 +63,10 @@ class ModTools(bpy.types.Panel):
         row.operator("mod_tools.copy_prop", icon='MESH_DATA', text="Copy")
         row.operator("mod_tools.paste_prop", icon='MESH_DATA', text="Paste")
         #col.separator()
-
+        
+        col.separator()
+        col.prop(context.scene.import_premade, "add_rig", text = "Add Rig")
+        
         col.label("Rename Vertex Groups")
         row = col.row(align = True)
         row.operator("mod_tools.target_armature", icon='ARMATURE_DATA', text="To Armature")

@@ -16,9 +16,9 @@ Quickly copy the properties from the active object and paste them to the entire 
 Convenient when transferring properties to non-game meshes, or when creating new bones.
 
 ## Transfer Names to prepared Armatures
-Rename vertex groups in your meshes instantly to match the names of bones on properly formatted blender armatures and back to the Mod3 Skeleton of Empties.
+Add premade armatures for testing weighting. 
 
-Compatible with Statyk's Player Body Armature.
+Rename vertex groups in your meshes instantly to match the names of bones on properly formatted blender armatures and back to the Mod3 Skeleton of Empties.
 
 ## Rename Bones to their Function IDs
 Rename bones to their function ID, simplifying copying mesh parts from one model to another. 
@@ -44,6 +44,9 @@ Mass triangulate over the entire selection (or the entire scene) with a button.
 # Credits
 ## Author
 * **AsteriskAmpersand/\*&**
+
+## Premade Armature Makers
+* **Statyk** - Player Character Armatures
 
 ## Feature Requests
 * **Lyraveil**

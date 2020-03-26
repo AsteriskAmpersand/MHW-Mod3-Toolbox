@@ -30,27 +30,32 @@ from .operators.modtools import (massTriangulate,
                                  nukeWeights,limitWeights,cleanGroups,cleanColor,
                                  solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
                                  targetArmature, targetEmpties, massWeight)
-from .operators.modtoolspanel import ModTools
+from .operators.rigtools import (getFPlayerRig, getMPlayerRig)
+from .operators.modtoolspanel import ModTools, ImportPremade
 from .operators.modpreferences import ModPrefs
 
 from .operators.selection import Selection
+
 
 classes = [Selection,
              massTriangulate,
              nukeWeights,limitWeights,cleanGroups,cleanColor,
              solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
              targetArmature, targetEmpties, massWeight,
-             ModTools,
+             getFPlayerRig,getMPlayerRig,
+             ModTools,ImportPremade,
              ModPrefs
            ]
 
 def register():
     for cl in classes:
         bpy.utils.register_class(cl)
+    bpy.types.Scene.import_premade = bpy.props.PointerProperty(type=ImportPremade)
     
 def unregister():
     for cl in classes:
         bpy.utils.unregister_class(cl)
+    del bpy.types.Scene.import_premade
     
 if __name__ == "__main__":
     try:

@@ -7,8 +7,6 @@ Created on Mon Mar 16 21:26:53 2020
 import bpy
 import bmesh
 
-
-
 class modTool(bpy.types.Operator):
     addon_key = __package__.split('.')[0]
     #addon = bpy.context.user_preferences.addons[addon_key]    
