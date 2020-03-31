@@ -6,6 +6,7 @@ Created on Mon Mar 16 21:26:53 2020
 """
 import bpy
 import bmesh
+import re
 
 class modTool(bpy.types.Operator):
     addon_key = __package__.split('.')[0]
@@ -515,7 +516,7 @@ class targetEmpties(modTool):
             #    modifiers["Auxiliary Armature"].object = armature
                 
         return {'FINISHED'}
-    
+
 class massWeight(modTool):
     bl_idname = 'mod_tools.mass_weight'
     bl_label = "Weights Selection to Group"
@@ -539,4 +540,70 @@ class massWeight(modTool):
             weights = obj.vertex_groups
             group = weights.new(self.vertex_group)
             group.add([i for i in range(len(obj.data.vertices))],1.0,'REPLACE')
+        return {"FINISHED"}
+    
+def cannonicalName(wgroup):
+    weightCaptureGroup = r"(.*)\( *([^,]*) *, *([-+]?[0-9]+)(/[0-9]+)? *\)$"
+    match = re.match(weightCaptureGroup,wgroup)
+    if not match: return wgroup
+    group = match.group
+    weightName = group(1)+group(2)
+    print("%s -> %s" %(wgroup, weightName))
+    weightIndex = int(group(3))
+    if weightIndex == -1:return None
+    else: return weightName
+
+class collapseWeights(modTool):
+    bl_idname = 'mod_tools.collapse_weights'
+    bl_label = "Collapses Split Groups and Removes Negative Weights"
+    bl_description = "Adds up the weights belonging to the same bone and removes negative weights."
+    bl_options = {"REGISTER", "PRESET", "UNDO"}  
+    
+    limit_application = bpy.props.BoolProperty(
+                        name = 'Limit to selected obejcts',
+                        description = 'Limit operator actions to current selected objects',
+                        default = True
+                        )
+    clear = bpy.props.BoolProperty(
+                        name = 'Delete Negative Weights',
+                        description = 'Delete groups corresponding to negative groups.',
+                        default = True
+                        )
+    def execute(self,context):
+        deleteTag = []
+        combiner = {}
+        active = bpy.context.active_object
+        meshes = getSelection(self.limit_application)
+        for mesh in meshes:
+            bpy.context.scene.objects.active = mesh
+            mode = mesh.mode
+            if mode != "OBJECT":
+                bpy.ops.object.mode_set(mode = 'OBJECT')
+            for group in mesh.vertex_groups:
+                cname = cannonicalName(group.name)
+                if cname is None:
+                    if self.clear:
+                        deleteTag.append(group)
+                else:
+                    #group.name = cname
+                    if cname not in combiner:
+                        combiner[cname] = []
+                    combiner[cname].append(group.name)
+            print ([g.name for g in deleteTag])
+            for name, groups in combiner.items():
+                base = groups[0]
+                for ix, group in enumerate(groups[1:]):
+                    m = mesh.modifiers.new("Combinator %03d",type = "VERTEX_WEIGHT_MIX")
+                    m.vertex_group_a = base
+                    m.vertex_group_b = group
+                    m.mix_mode = "ADD"
+                    m.mix_set = "OR"
+                    bpy.ops.object.modifier_apply(modifier = m.name)
+                    deleteTag.append(mesh.vertex_groups[group])
+                mesh.vertex_groups[base].name = name
+            for d in deleteTag:
+                mesh.vertex_groups.remove(d)
+            if mode != "OBJECT":
+                bpy.ops.object.mode_set(mode = mode)
+        bpy.context.scene.objects.active = active
         return {"FINISHED"}
