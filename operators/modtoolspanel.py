@@ -35,7 +35,7 @@ class ImportPremade(bpy.types.PropertyGroup):
     )
 
 class ModTools(bpy.types.Panel):
-    bl_category = "MHW Physics"
+    bl_category = "MHW Tools"
     bl_idname = "panel.mhw_mod"
     bl_label = "MOD3 Tools"
     bl_space_type = "VIEW_3D"

@@ -20,7 +20,7 @@ bl_info = {
     "name": "MHW Mod3 Tools",
     "category": "Game Engine",
     "author": "AsteriskAmpersand",
-    "location": "View3D > MHW Physics > Mod3/MHW",
+    "location": "View3D > MHW Tools > Mod3/MHW",
     "version": (1,0,0)
 }
  
