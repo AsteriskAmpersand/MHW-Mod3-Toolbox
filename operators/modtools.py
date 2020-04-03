@@ -187,6 +187,7 @@ def bad_iter(blenderCrap):
             
 def selectRepeated(bm):
     bm.verts.index_update()
+    bm.verts.ensure_lookup_table()
     targetVert = set()
     for uv_layer in bad_iter(bm.loops.layers.uv):
         uvMap = {}
