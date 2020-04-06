@@ -608,3 +608,18 @@ class collapseWeights(modTool):
                 bpy.ops.object.mode_set(mode = mode)
         bpy.context.scene.objects.active = active
         return {"FINISHED"}
+    
+class cleanMaterials(modTool):
+    bl_idname = 'mod_tools.clean_materials'
+    bl_label = "Removes unused materials from the material list"
+    bl_description = "Deletes all unassigned MRL3 materials from the header."
+    bl_options = {"REGISTER", "PRESET", "UNDO"}  
+
+    def execute(self,context):
+        bpy.context.scene["materialCount"] = 0
+        i = 0
+        while("MaterialName%d"%i in bpy.context.scene):
+            del bpy.context.scene["MaterialName%d"%i]
+            i+=1
+        return {"FINISHED"}
+    

@@ -29,7 +29,8 @@ import bpy
 from .operators.modtools import (massTriangulate,
                                  nukeWeights,limitWeights,cleanGroups,cleanColor,
                                  solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
-                                 targetArmature, targetEmpties, massWeight, collapseWeights)
+                                 targetArmature, targetEmpties, massWeight, collapseWeights,
+                                 cleanMaterials)
 from .operators.rigtools import (getFPlayerRig, getMPlayerRig)
 from .operators.modtoolspanel import ModTools, ImportPremade
 from .operators.modpreferences import ModPrefs
@@ -42,6 +43,7 @@ classes = [Selection,
              nukeWeights,limitWeights,cleanGroups,cleanColor,
              solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
              targetArmature, targetEmpties, massWeight, collapseWeights,
+             cleanMaterials,
              getFPlayerRig,getMPlayerRig,
              ModTools,ImportPremade,
              ModPrefs
