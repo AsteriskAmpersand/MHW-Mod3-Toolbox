@@ -7,6 +7,7 @@ Created on Mon Mar 16 21:26:53 2020
 import bpy
 import bmesh
 import re
+import random
 
 class modTool(bpy.types.Operator):
     addon_key = __package__.split('.')[0]
@@ -59,6 +60,12 @@ class pasteProp(modTool):
         
         #row.operator("mod_tools.paste_mesh_prop", icon='MESH_DATA', text="Paste")
 
+def remapMeshBones(renameTable):
+    for mesh in [o for o in bpy.context.scene.objects if o.type == "MESH"]:
+        for group in mesh.vertex_groups:
+            if group.name in renameTable:
+                group.name = renameTable[group.name]
+
 class boneToID(modTool):
     bl_idname = 'mod_tools.bone_to_id'
     bl_label = "Rename Bones to Function"
@@ -71,16 +78,42 @@ class boneToID(modTool):
             newname = "BoneFunction%03d"%bone["boneFunction"]
             renameTable[bone .name] = newname 
             bone.name = newname        
-        for mesh in [o for o in bpy.context.scene.objects if o.type == "MESH"]:
-            for group in mesh.vertex_groups:
-                if group.name in renameTable:
-                    group.name = renameTable[group.name]
+        remapMeshBones(renameTable)
         return {'FINISHED'}  
-    
-        #col.operator("mod_tools.bone_to_id", icon='COSNTRAINT_BONE', text="Rename Bones to ID")
 
-        #col.prop(addon_props, 'only_selection', text = 'Limit to Selection')
+class boneRename(modTool):
+    bl_idname = 'mod_tools.bone_rename'
+    bl_label = "Rename Bones to Function"
+    bl_description = 'Renames every bone to their Bone Function ID.'
+    bl_options = {"REGISTER", "PRESET", "UNDO"}    
 
+    prepend = bpy.props.StringProperty(
+                        name = 'Prepend Text',
+                        description = 'Text to prepend to the groups.',
+                        default = "",
+                        )
+    append = bpy.props.StringProperty(
+                        name = 'Append Text',
+                        description = 'Text to append to the groups.',
+                        default = "",
+                        )
+    randomize = bpy.props.BoolProperty(
+                        name = "Randomize ID",
+                        description = 'Add Randomized ID to Bone Name String',
+                        default = True,
+            )
+
+    def execute(self,context):
+        renameTable = {}
+        for bone in [o for o in bpy.context.scene.objects if o.type == "EMPTY" and "boneFunction" in o]:
+            newname = self.prepend + ("-"+("%1.8f"%random.random())[2:]+"-" if self.randomize else "") + bone.name + self.append
+            renameTable[bone .name] = newname 
+            bone.name = newname        
+        remapMeshBones(renameTable)
+        return {'FINISHED'}
+
+        #col.operator("mod_tools.bone_rename", icon='CONSTRAINT_BONE', text="Rename Bones")
+       
 def getSelection(onlySelection, selectionType = "MESH"):
     return [obj for obj in (bpy.context.selected_objects if onlySelection else bpy.context.scene.objects) 
             if obj.type == selectionType and not obj.hide and not obj.hide_select]
