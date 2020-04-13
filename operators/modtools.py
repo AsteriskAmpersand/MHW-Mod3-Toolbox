@@ -554,7 +554,7 @@ class targetEmpties(modTool):
 class massWeight(modTool):
     bl_idname = 'mod_tools.mass_weight'
     bl_label = "Weights Selection to Group"
-    bl_description = "Renames every vertex group to it's Empty Target Name based on Current Bone Function ID."
+    bl_description = "Weights all objects in the selection to a single bone."
     bl_options = {"REGISTER", "PRESET", "UNDO"}  
     
     limit_application = bpy.props.BoolProperty(
@@ -604,11 +604,11 @@ class collapseWeights(modTool):
                         default = True
                         )
     def execute(self,context):
-        deleteTag = []
-        combiner = {}
         active = bpy.context.active_object
         meshes = getSelection(self.limit_application)
         for mesh in meshes:
+            deleteTag = []
+            combiner = {}
             bpy.context.scene.objects.active = mesh
             mode = mesh.mode
             if mode != "OBJECT":
@@ -623,7 +623,7 @@ class collapseWeights(modTool):
                     if cname not in combiner:
                         combiner[cname] = []
                     combiner[cname].append(group.name)
-            print ([g.name for g in deleteTag])
+            #print ([g.name for g in deleteTag])
             for name, groups in combiner.items():
                 base = groups[0]
                 for ix, group in enumerate(groups[1:]):
