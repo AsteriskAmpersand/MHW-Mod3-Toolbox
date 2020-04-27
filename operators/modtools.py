@@ -386,7 +386,7 @@ class cleanGroups(modTool):
                 for vg in v.groups:
                     usedGroups.add(vg.group)            
             weights = list(obj.vertex_groups)
-            for group in weights:
+            for group in sorted(weights,key = lambda x: x.index,reverse=True):
                 if group.index not in usedGroups:
                     obj.vertex_groups.remove(group)
         return {'FINISHED'}
