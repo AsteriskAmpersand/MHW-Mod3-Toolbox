@@ -75,6 +75,7 @@ class ModTools(bpy.types.Panel):
         
         col.operator("mod_tools.bone_to_id", icon='CONSTRAINT_BONE', text="Rename Bones to ID")
         col.operator("mod_tools.bone_rename", icon='CONSTRAINT_BONE', text="Rename Bones")
+        col.operator("mod_tools.bone_merge", icon='CONSTRAINT_BONE', text="Merge Skeletons")
         
         #col.prop(addon_props, 'limit_application', text = 'Limit to Selection')
         col.operator("mod_tools.mark_uv_rep", icon='EDGESEL', text="Mark Repeated UVs")

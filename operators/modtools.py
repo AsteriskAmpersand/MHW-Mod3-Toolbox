@@ -8,6 +8,7 @@ import bpy
 import bmesh
 import re
 import random
+from collections import OrderedDict
 
 class modTool(bpy.types.Operator):
     addon_key = __package__.split('.')[0]
@@ -113,7 +114,93 @@ class boneRename(modTool):
         return {'FINISHED'}
 
         #col.operator("mod_tools.bone_rename", icon='CONSTRAINT_BONE', text="Rename Bones")
-       
+
+class skeletonMerge(modTool):
+    bl_idname = 'mod_tools.bone_merge'
+    bl_label = "Merge Selected Skeleton into Active Skeleton"
+    bl_description = 'Renames every bone to their Bone Function ID.'
+    bl_options = {"REGISTER", "PRESET", "UNDO"}
+    
+    #ignoreDistance = bpy.props.BoolProperty(
+    #                    name = "Ignore Match Distance",
+    #                    description = 'Ignores if the distance between identical functions is above threshold',
+    #                    default = True,
+    #        )
+    #threshold = bpy.props.FloatProperty(
+    #                    name = 'Match Distance',
+    #                    description = 'Distance tolerance for identical functions to not stop and error out.',
+    #                    default = 0.01,
+    #                    )
+    
+    @classmethod
+    def poll(cls, context):
+        return all(("Type" in root and root["Type"] == "MOD3_SkeletonRoot" for root in bpy.selection)) and context.active_object
+
+    def execute(self,context):
+        target = context.active_object        
+        for source in bpy.selection:
+            if source != target:
+                targetMapping = self.generateMapping(target)
+                sourceMapping = self.generateMapping(source)
+                ctcDependants = self.generateCTCDependencies(source)
+                self.mergeMappings(sourceMapping,ctcDependants,targetMapping)            
+                #self.cleanSource(source,target)
+        return {'FINISHED'}
+    
+    def checkNode(self,node):
+        return "Type" in node and node["Type"] == "CTC_Node" and "Bone Function" in node.constraints
+    
+    def examineNode(self,node,mapping):
+        if not self.checkNode(node):
+            return mapping
+        if node.constraints["Bone Function"].target in mapping:
+            mapping[node.constraints["Bone Function"].target].append(node)
+        for child in node.children:
+            self.examineNode(child,mapping)
+        return mapping
+    
+    def expandSource(self,source):
+        mapping = {source:list()}
+        for children in source.children:
+            mapping.update(self.expandSource(children))
+        return mapping
+    
+    def generateCTCDependencies(self,source):
+        dependencyMap = self.expandSource(source)
+        for root in [obj for obj in bpy.context.scene.objects if "Type" in obj and obj["Type"] == "CTC"]:
+            for chain in root.children:
+                for node in chain.children:
+                    self.examineNode(node,dependencyMap)
+        return dependencyMap
+                    
+            
+    def generateMapping(self,root):
+        mapping = OrderedDict()
+        try:
+            mapping[int(root["boneFunction"])] = root
+        except:
+            pass
+        for c in root.children:
+            mapping.update(self.generateMapping(c))
+        return mapping
+
+    def mergeMappings(self,source,sourceCtcDependants,target):
+        mergeTable = {}
+        for function in source:
+            if function in target:
+                for children in source[function].children:
+                    children.parent = target[function]
+                    if source[function] in sourceCtcDependants:
+                        for dependent in sourceCtcDependants[source[function]]:
+                            dependent.constraints["Bone Function"].target = target[function]
+                    mergeTable[source[function].name]=target[function].name                
+                bpy.data.objects.remove(source[function], do_unlink=True)
+        remapMeshBones(mergeTable)
+    #col.operator("mod_tools.bone_rename", icon='CONSTRAINT_BONE', text="Rename Bones")
+
+    def meshReplace(sourceName,targetName):
+        pass
+
 def getSelection(onlySelection, selectionType = "MESH"):
     return [obj for obj in (bpy.context.selected_objects if onlySelection else bpy.context.scene.objects) 
             if obj.type == selectionType and not obj.hide and not obj.hide_select]
