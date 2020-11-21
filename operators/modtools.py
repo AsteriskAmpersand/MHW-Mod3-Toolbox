@@ -454,7 +454,69 @@ class cleanColor(modTool):
         return {'FINISHED'}
     
         #col.operator("mod_tools.clean_color", icon='COLOR', text="Clean Vertex Colors")
+
+class generateColor(modTool):
+    bl_idname = 'mod_tools.generate_color'
+    bl_label = "Removes Colour"
+    bl_description = 'Mass Deletes the Colour Channels.'
+    bl_options = {"REGISTER", "PRESET", "UNDO"}
+    limit_application = bpy.props.BoolProperty(
+                        name = 'Limit to selected obejcts',
+                        description = 'Limit operator actions to current selected objects',
+                        default = True
+                        )
+    
+    def setRenderSetttings(self):
+        bpy.context.scene.render.engine = "BLENDER_RENDER"
+        bpy.context.scene.render.bake_type = "NORMALS"
+        bpy.context.scene.render.use_bake_multires = False
+        bpy.context.scene.render.bake_normal_space = "WORLD"
+        bpy.context.scene.render.use_bake_to_vertex_color = True
+        bpy.context.scene.render.use_bake_selected_to_active = True 
+    
+    def invert(self,obj):
+        for ipoly in range(len(obj.data.polygons)):
+            for idx, ivertex in enumerate(obj.data.polygons[ipoly].loop_indices):
+                ivert = obj.data.polygons[ipoly].vertices[idx]
+                col = obj.data.vertex_colors.active.data[ivertex].color
+                obj.data.vertex_colors.active.data[ivertex].color = tuple(1-x for x in col)
+    
+    def generate(self,obj):
+        bpy.context.scene.objects.active = obj
+        obj.select = True            
+        h,r =obj.hide, obj.hide_render
+        obj.hide_render = False
         
+        ix = len(obj.data.vertex_colors)
+        obj.data.vertex_colors.new("World Space Normals")
+        obj.data.vertex_colors.active_index = ix
+        bpy.ops.object.bake_image()
+        self.invert(obj)
+        
+        obj.select = False
+        obj.hide_render = r
+        obj.hide = h
+    
+    def execute(self,context):
+        engine = bpy.context.scene.render.engine
+        active = bpy.context.active_object
+        
+        self.setRenderSetttings()
+        
+        meshes = getSelection(self.limit_application)
+        selection = [m for m in bpy.context.scene.objects if m.select ]
+        for s in selection:
+            s.select = False
+            
+        for obj in meshes:
+            self.generate(obj)
+        bpy.context.scene.render.engine = engine
+        
+        for s in selection:
+            s.select = True
+        bpy.context.scene.objects.active = active
+        return {'FINISHED'}
+
 class cleanGroups(modTool):
     bl_idname = 'mod_tools.clean_weights'
     bl_label = "Remove Unweighted Groups"
@@ -742,4 +804,3 @@ class cleanMaterials(modTool):
             del bpy.context.scene["MaterialName%d"%i]
             i+=1
         return {"FINISHED"}
-    
