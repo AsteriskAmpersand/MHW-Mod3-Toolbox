@@ -30,11 +30,15 @@ from .operators.modtools import (massTriangulate,
                                  nukeWeights,limitWeights,cleanGroups,cleanColor,generateColor,
                                  solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
                                  targetArmature, targetEmpties, massWeight, collapseWeights,
-                                 boneRename, skeletonMerge,
+                                 boneRename, skeletonMerge, reindexMeshes,
                                  cleanMaterials)
 from .operators.rigtools import (getFPlayerRig, getMPlayerRig)
 from .operators.modtoolspanel import ModTools, ImportPremade
 from .operators.modpreferences import ModPrefs
+from .operators.plimportexport import ImportPL,ExportPL
+from .operators.plimportexport import menu_func_import as import_func
+from .operators.plimportexport import menu_func_export as export_func
+
 
 from .operators.selection import Selection
 
@@ -44,22 +48,27 @@ classes = [Selection,
              nukeWeights,limitWeights,cleanGroups,cleanColor,generateColor,
              solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
              targetArmature, targetEmpties, massWeight, collapseWeights,
-             boneRename, skeletonMerge,
+             boneRename, skeletonMerge, reindexMeshes,
              cleanMaterials,
              getFPlayerRig,getMPlayerRig,
              ModTools,ImportPremade,
-             ModPrefs
+             ModPrefs,
+             ImportPL,ExportPL,
            ]
 
 def register():
     for cl in classes:
         bpy.utils.register_class(cl)
+    bpy.types.INFO_MT_file_import.append(import_func)
+    bpy.types.INFO_MT_file_export.append(export_func)
     bpy.types.Scene.import_premade = bpy.props.PointerProperty(type=ImportPremade)
     
 def unregister():
     for cl in classes:
         bpy.utils.unregister_class(cl)
     del bpy.types.Scene.import_premade
+    bpy.types.INFO_MT_file_import.remove(import_func)
+    bpy.types.INFO_MT_file_export.remove(export_func)
     
 if __name__ == "__main__":
     try:

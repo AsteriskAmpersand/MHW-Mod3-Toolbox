@@ -84,8 +84,8 @@ class boneToID(modTool):
 
 class boneRename(modTool):
     bl_idname = 'mod_tools.bone_rename'
-    bl_label = "Rename Bones to Function"
-    bl_description = 'Renames every bone to their Bone Function ID.'
+    bl_label = "Rename Bones"
+    bl_description = 'Mass Renames Bones.'
     bl_options = {"REGISTER", "PRESET", "UNDO"}    
 
     prepend = bpy.props.StringProperty(
@@ -118,7 +118,7 @@ class boneRename(modTool):
 class skeletonMerge(modTool):
     bl_idname = 'mod_tools.bone_merge'
     bl_label = "Merge Selected Skeleton into Active Skeleton"
-    bl_description = 'Renames every bone to their Bone Function ID.'
+    bl_description = 'Merges Selected Skeleton into Active Skeleton fusing similar bone functions and reparenting physics entries.'
     bl_options = {"REGISTER", "PRESET", "UNDO"}
     
     #ignoreDistance = bpy.props.BoolProperty(
@@ -204,6 +204,22 @@ class skeletonMerge(modTool):
 def getSelection(onlySelection, selectionType = "MESH"):
     return [obj for obj in (bpy.context.selected_objects if onlySelection else bpy.context.scene.objects) 
             if obj.type == selectionType and not obj.hide and not obj.hide_select]
+  
+class reindexMeshes(modTool):
+    bl_idname = 'mod_tools.reindex_meshes'
+    bl_label = "Reindex Meshes"
+    bl_description = 'Reindexes meshes with mod3 properties.'
+    bl_options = {"REGISTER", "PRESET", "UNDO"}    
+    limit_application = bpy.props.BoolProperty(
+                        name = 'Limit to selected obejcts',
+                        description = 'Limit operator actions to current selected objects',
+                        default = True
+                        )
+
+    def execute(self,context):
+        meshes = getSelection(self.limit_application)
+        for ix,mesh in enumerate((m for m in meshes if "unknownIndex" in m.data)):
+            mesh.data["unknownIndex"] = ix+1
     
 def detectRepeatedUV(mesh):
     mesh = mesh.data
@@ -479,7 +495,7 @@ class generateColor(modTool):
             for idx, ivertex in enumerate(obj.data.polygons[ipoly].loop_indices):
                 ivert = obj.data.polygons[ipoly].vertices[idx]
                 col = obj.data.vertex_colors.active.data[ivertex].color
-                obj.data.vertex_colors.active.data[ivertex].color = tuple(1-x for x in col)
+                obj.data.vertex_colors.active.data[ivertex].color = tuple(1-x if (i != 0 and i != 3) else x for i,x in enumerate(col))
     
     def generate(self,obj):
         bpy.context.scene.objects.active = obj
