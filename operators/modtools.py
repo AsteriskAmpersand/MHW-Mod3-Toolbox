@@ -47,7 +47,9 @@ class pasteProp(modTool):
     
     @classmethod
     def poll(cls, context):
-        return bpy.context.user_preferences.addons[cls.addon_key].preferences.data["properties_buffer"] != {} and len(bpy.context.selected_objects) > 0
+        return ((bpy.context.user_preferences.addons[cls.addon_key].preferences.data["properties_buffer"] != {} or 
+                 bpy.context.user_preferences.addons[cls.addon_key].preferences.data["data_properties_buffer"] != {}) and
+                 len(bpy.context.selected_objects) > 0)
     #Check there's property on buffer and selection is non null
     
     def execute(self,context):
