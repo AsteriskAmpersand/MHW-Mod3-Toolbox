@@ -136,11 +136,19 @@ class skeletonMerge(modTool):
     
     @classmethod
     def poll(cls, context):
-        return all(("Type" in root and root["Type"] == "MOD3_SkeletonRoot" for root in bpy.selection)) and context.active_object
+        try:
+            result = all(("Type" in root and root["Type"] == "MOD3_SkeletonRoot" for root in bpy.selection)) and context.active_object
+        except:
+            result = all(("Type" in root and root["Type"] == "MOD3_SkeletonRoot" for root in bpy.context.scene.selected_objects)) and context.active_object
+        return result
 
     def execute(self,context):
-        target = context.active_object        
-        for source in bpy.selection:
+        target = context.active_object   
+        try:
+            sources = [x for x in bpy.selection]
+        except:
+            sources = [x for x in bpy.context.scene.selected_objects]
+        for source in sources:
             if source != target:
                 targetMapping = self.generateMapping(target)
                 sourceMapping = self.generateMapping(source)
