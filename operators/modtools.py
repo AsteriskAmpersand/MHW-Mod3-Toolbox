@@ -483,8 +483,8 @@ class cleanColor(modTool):
 
 class generateColor(modTool):
     bl_idname = 'mod_tools.generate_color'
-    bl_label = "Removes Colour"
-    bl_description = 'Mass Deletes the Colour Channels.'
+    bl_label = "Generates Colour"
+    bl_description = 'Generates Colour Channel from Baked Normals.'
     bl_options = {"REGISTER", "PRESET", "UNDO"}
     limit_application = bpy.props.BoolProperty(
                         name = 'Limit to selected obejcts',
@@ -541,6 +541,33 @@ class generateColor(modTool):
         for s in selection:
             s.select = True
         bpy.context.scene.objects.active = active
+        return {'FINISHED'}
+
+class setColour(modTool):
+    bl_idname = 'mod_tools.set_color'
+    bl_label = "Set Colour Alpha"
+    bl_description = 'Set Colour Channel Alpha to Value.'
+    bl_options = {"REGISTER", "PRESET", "UNDO"}
+
+    fixed_value = bpy.props.FloatProperty(
+            name = "Alpha Value",
+            description = "Value to set the alpha of all vertices [0,1]",
+            default = 0.0
+        )
+    
+    @classmethod
+    def poll(cls,context):
+        if bpy.context.active_object:
+            if bpy.context.active_object.type == "MESH":
+                if len(bpy.context.active_object.data.vertex_colors):
+                    return True                    
+        return False
+    
+    def execute(self,context):
+        for v in  bpy.context.active_object.data.vertex_colors.active.data:
+            if len(v.color) < 4:
+                v.color = list(v.color)+ [1.0]
+            v.color[3] = max(min(self.fixed_value,1),0)
         return {'FINISHED'}
 
 class cleanGroups(modTool):

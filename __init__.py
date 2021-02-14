@@ -26,8 +26,8 @@ bl_info = {
  
 import bpy
 
-from .operators.modtools import (massTriangulate,
-                                 nukeWeights,limitWeights,cleanGroups,cleanColor,generateColor,
+from .operators.modtools import (massTriangulate,nukeWeights,limitWeights,
+                                 cleanGroups,cleanColor,generateColor,setColour,
                                  solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
                                  targetArmature, targetEmpties, massWeight, collapseWeights,
                                  boneRename, skeletonMerge, reindexMeshes,
@@ -45,7 +45,7 @@ from .operators.selection import Selection
 
 classes = [Selection,
              massTriangulate,
-             nukeWeights,limitWeights,cleanGroups,cleanColor,generateColor,
+             nukeWeights,limitWeights,cleanGroups,cleanColor,generateColor,setColour,
              solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
              targetArmature, targetEmpties, massWeight, collapseWeights,
              boneRename, skeletonMerge, reindexMeshes,

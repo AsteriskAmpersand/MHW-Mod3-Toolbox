@@ -83,6 +83,7 @@ class ModTools(bpy.types.Panel):
         col.operator("mod_tools.solve_sharp_rep", icon='SNAP_EDGE', text="Split Sharp and Repeated UVs")
         col.operator("mod_tools.clean_color", icon='COLOR', text="Clean Vertex Colors")
         col.operator("mod_tools.generate_color", icon='COLOR', text="Generate Vertex Colors")
+        col.operator("mod_tools.set_color", icon='COLOR', text="Set Vertex Colors")
         col.operator("mod_tools.clean_materials", icon='GROUP_UVS', text="Clean Materials List")
         col.operator("mod_tools.clean_weights", icon='GROUP_VERTEX', text="Remove Unweighted Groups")
         col.operator("mod_tools.limit_normalize", icon='GROUP_VERTEX', text="Limit Weights to Label")
@@ -91,5 +92,3 @@ class ModTools(bpy.types.Panel):
         col.operator("mod_tools.collapse_weights", icon='GROUP_VERTEX', text="Collapse Weights")
         col.operator('mod_tools.reindex_meshes', icon='GROUP_VERTEX', text="Reindex Meshes")
         col.operator("mod_tools.mass_triangulate", icon='GROUP_VERTEX', text="Triangulate")
-        
-        
