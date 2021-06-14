@@ -139,7 +139,7 @@ class skeletonMerge(modTool):
         try:
             result = all(("Type" in root and root["Type"] == "MOD3_SkeletonRoot" for root in bpy.selection)) and context.active_object
         except:
-            result = all(("Type" in root and root["Type"] == "MOD3_SkeletonRoot" for root in bpy.context.scene.selected_objects)) and context.active_object
+            result = all(("Type" in root and root["Type"] == "MOD3_SkeletonRoot" for root in bpy.context.selected_objects)) and context.active_object
         return result
 
     def execute(self,context):
@@ -147,7 +147,7 @@ class skeletonMerge(modTool):
         try:
             sources = [x for x in bpy.selection]
         except:
-            sources = [x for x in bpy.context.scene.selected_objects]
+            sources = [x for x in bpy.context.selected_objects]
         for source in sources:
             if source != target:
                 targetMapping = self.generateMapping(target)
@@ -605,6 +605,11 @@ class limitWeights(modTool):
                         description = 'Limit operator actions to current selected objects',
                         default = True
                         )
+    explicit_4th = bpy.props.BoolProperty(
+                        name = 'Allow Implicit Weight',
+                        description = 'Allow the implicit weight (otherwise limits to label -1)',
+                        default = True
+                        )
    
     def execute(self,context):
         meshes = getSelection(self.limit_application)
@@ -630,7 +635,8 @@ class limitWeights(modTool):
         bpy.context.scene.objects.active = mesh
         bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
         
-        bpy.ops.object.vertex_group_limit_total(limit = max(count-1,0))
+        lim = count - (1*(not self.explicit_4th))
+        bpy.ops.object.vertex_group_limit_total(limit = max(lim,0))
         bpy.ops.object.vertex_group_normalize_all(lock_active = False)
         
         bpy.ops.object.mode_set(mode=oldmode)
@@ -857,3 +863,24 @@ class cleanMaterials(modTool):
             del bpy.context.scene["MaterialName%d"%i]
             i+=1
         return {"FINISHED"}
+    
+class cleanUVs(modTool):
+    bl_idname = 'mod_tools.clean_uvs'
+    bl_label = "Removes secondary and tertiary uv maps"
+    bl_description = "Deletes all extraneous uv maps."
+    bl_options = {"REGISTER", "PRESET", "UNDO"}  
+    
+    limit_application = bpy.props.BoolProperty(
+                        name = 'Limit to selected obejcts',
+                        description = 'Limit operator actions to current selected objects',
+                        default = True
+                        )
+    def execute(self,context):
+        meshes = getSelection(self.limit_application)
+        for mesh in meshes:
+            uv_textures = mesh.uv_textures
+            for ix,tex in reversed(list(enumerate(uv_textures))):
+                if ix != 0:
+                    uv_textures.remove(uv_textures[ix])
+        return {"FINISHED"}
+
