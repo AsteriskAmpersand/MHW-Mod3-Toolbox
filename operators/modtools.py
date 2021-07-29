@@ -839,7 +839,7 @@ class collapseWeights(modTool):
                     m.vertex_group_a = base
                     m.vertex_group_b = group
                     m.mix_mode = "ADD"
-                    m.mix_set = "OR"
+                    m.mix_set = "ALL"
                     bpy.ops.object.modifier_apply(modifier = m.name)
                     deleteTag.append(mesh.vertex_groups[group])
                 mesh.vertex_groups[base].name = name
