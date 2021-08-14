@@ -20,7 +20,7 @@ class copyProp(modTool):
     bl_idname = 'mod_tools.copy_prop'
     bl_label = "Copy Mesh Properties"
     bl_description = 'Copy the Custom Properties of the Active Mesh'
-    bl_options = {"REGISTER", "PRESET", "UNDO"}        
+    bl_options = {"REGISTER"}        
     @classmethod
     def poll(cls, context):
         return (bpy.context.active_object is not None)
@@ -43,7 +43,7 @@ class pasteProp(modTool):
     bl_idname = 'mod_tools.paste_prop'
     bl_label = "Paste Mesh Properties"
     bl_description = 'Paste the Custom Properties of the Active Mesh'
-    bl_options = {"REGISTER", "PRESET", "UNDO"}    
+    bl_options = {"REGISTER"}    
     
     @classmethod
     def poll(cls, context):
@@ -701,18 +701,81 @@ def getArmature():
         raise ValueError("Can't find canonical armature for the transfer to work on. There are %d/1 targets."%len(arma))
     return arma[0]
 
-class targetArmature(modTool):
+def isEmptySkeleton(obj):
+    return "Type" in obj and obj["Type"] == "MOD3_SkeletonRoot"
+
+def isArmature(obj):
+    return  obj.type == "ARMATURE"
+
+def metaBuildEnum(checkFunc):
+    def buildEnum(self,context):
+        enumItems = []# [("None","None","None","",0)]
+        for obj in bpy.context.scene.objects:
+            try:
+                if checkFunc(obj):
+                    enumItems.append((obj.name,obj.name,""))#,"","",hash(obj.name)&0x7FFFFFFF))
+            except:
+                raise
+        return list(reversed(enumItems))
+    return buildEnum
+
+emptyEnum = metaBuildEnum(isEmptySkeleton)
+armatureEnum = metaBuildEnum(isArmature)
+          
+class transferOperator():
+    
+    def getObject(self,objectName):
+        if objectName not in bpy.data.objects:
+            return None
+        return bpy.data.objects[objectName]
+    
+    def check(self,context):
+        if self.getObject(self.emptySkeleton) is None:
+            return False
+        if self.getObject(self.armatureSkeleton) is None:
+            return False
+        return True
+    
+    #def draw(self,context):
+    #    layout = self.layout
+    #    layout.prop(bpy.context.scene.mod3toolbox_transfer_targets,"emptySkeleton")
+    #    layout.prop(bpy.context.scene.mod3toolbox_transfer_targets,"armatureSkeleton")       
+    
+    def getArmature(self,context):
+        return self.getObject(self.armatureSkeleton)
+    
+    def recursiveList(self,empty):
+        deepChildren = [empty]
+        for e in empty.children:
+            deepChildren += self.recursiveList(e)
+        return deepChildren
+    
+    def getEmptyHierarchy(self,context):        
+        emptyRoot = self.getObject(self.emptySkeleton)
+        ehierarchy = [e for e in self.recursiveList(emptyRoot) if e.type == "EMPTY" and "boneFunction" in e]
+        return ehierarchy
+    
+    def generateEmptyMapFrom(self,context):
+        fromEmpty = {}
+        ehierarchy = self.getEmptyHierarchy(context)
+        for ebone in ehierarchy:
+            fromEmpty[ebone["boneFunction"]] = ebone
+        return fromEmpty
+
+class targetArmature(transferOperator,modTool):
     bl_idname = 'mod_tools.target_armature'
     bl_label = "Rename Groups to Armature Names"
     bl_description = "Renames every vertex group to it's Armature Target Name based on Current Bone Function ID."
-    bl_options = {"REGISTER", "PRESET", "UNDO"}    
+    bl_options = {"REGISTER", "UNDO"}    
+    emptySkeleton = bpy.props.EnumProperty(name = "Empty Hierarchy Skeleton", items = emptyEnum)
+    armatureSkeleton = bpy.props.EnumProperty(name = "Armature Skeleton", items = armatureEnum)
 
     def execute(self,context):
-        fromEmpty = {}
-        remapTable = {}
-        for ebone in [o for o in bpy.context.scene.objects if o.type == "EMPTY" and "boneFunction" in o]:
-            fromEmpty[ebone["boneFunction"]] = ebone
-        armature = getArmature()
+        if not self.check(context):
+            return {'FINISHED'}
+        fromEmpty = self.generateEmptyMapFrom(context)
+        armature = self.getArmature(context)
+        remapTable = {}        
         for bone in armature.pose.bones:
             if "boneFunction" in bone and bone["boneFunction"] in fromEmpty:
                 remapTable[fromEmpty[bone["boneFunction"]].name] = bone.name
@@ -729,20 +792,27 @@ class targetArmature(modTool):
                 modifiers["Auxiliary Armature"].object = armature
         return {'FINISHED'}
 
-class targetEmpties(modTool):
+class targetEmpties(transferOperator,modTool):
     bl_idname = 'mod_tools.target_weights'
     bl_label = "Rename Groups to Empty Names"
     bl_description = "Renames every vertex group to it's Empty Target Name based on Current Bone Function ID."
-    bl_options = {"REGISTER", "PRESET", "UNDO"}    
-
+    bl_options = {"REGISTER", "UNDO"}    
+    emptySkeleton = bpy.props.EnumProperty(name = "Empty Hierarchy Skeleton", items = metaBuildEnum(isEmptySkeleton))
+    armatureSkeleton = bpy.props.EnumProperty(name = "Armature Skeleton", items = metaBuildEnum(isArmature))
+    
     def execute(self,context):
+        if not self.check(context):
+            return {'FINISHED'}
         fromArmature = {}
         remapTable = {}
-        armature = getArmature()
+        
+        armature = self.getArmature(context)
+        empties = self.getEmptyHierarchy(context)
+        
         for bone in armature.pose.bones:
             if "boneFunction" in bone:
                 fromArmature[bone["boneFunction"]]=bone
-        for ebone in [o for o in bpy.context.scene.objects if o.type == "EMPTY" and "boneFunction" in o]:
+        for ebone in empties:
             if ebone["boneFunction"] in fromArmature:
                 remapTable[fromArmature[ebone["boneFunction"]].name] = ebone.name
                 
