@@ -78,7 +78,7 @@ class boneToID(modTool):
     def execute(self,context):
         renameTable = {}
         for bone in [o for o in bpy.context.scene.objects if o.type == "EMPTY" and "boneFunction" in o]:
-            newname = "BoneFunction%03d"%bone["boneFunction"]
+            newname = "BoneFunction.%03d"%bone["boneFunction"]
             renameTable[bone .name] = newname 
             bone.name = newname        
         remapMeshBones(renameTable)
@@ -90,6 +90,11 @@ class boneRename(modTool):
     bl_description = 'Mass Renames Bones.'
     bl_options = {"REGISTER", "PRESET", "UNDO"}    
 
+    searchReplace = bpy.props.BoolProperty(
+                        name = "Search and Replace Bone Names",
+                        description = 'Change Mode to Search and Replace',
+                        default = False,
+            )
     prepend = bpy.props.StringProperty(
                         name = 'Prepend Text',
                         description = 'Text to prepend to the groups.',
@@ -105,11 +110,38 @@ class boneRename(modTool):
                         description = 'Add Randomized ID to Bone Name String',
                         default = True,
             )
-
+    find = bpy.props.StringProperty(
+                        name = 'Text to Find',
+                        description = 'Text to find on the groups.',
+                        default = "",
+                        )
+    replace = bpy.props.StringProperty(
+                        name = 'Text to Replace',
+                        description = 'Text to replace on the groups.',
+                        default = "",
+                        )
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.prop(self, "searchReplace")
+        if self.searchReplace:
+            col.prop(self, "find")
+            col.prop(self, "replace")
+        else:
+            col.prop(self, "prepend")
+            col.prop(self, "append")
+            col.prop(self, "randomize")            
+    
+    def replacementFunction(self,bone):
+        if not self.searchReplace:
+            return self.prepend + ("-"+("%1.8f"%random.random())[2:]+"-" if self.randomize else "") + bone.name + self.append
+        else:
+            return re.sub(self.find, self.replace, bone.name)
+    
     def execute(self,context):
         renameTable = {}
         for bone in [o for o in bpy.context.scene.objects if o.type == "EMPTY" and "boneFunction" in o]:
-            newname = self.prepend + ("-"+("%1.8f"%random.random())[2:]+"-" if self.randomize else "") + bone.name + self.append
+            newname = self.replacementFunction(bone)
             renameTable[bone .name] = newname 
             bone.name = newname        
         remapMeshBones(renameTable)
