@@ -84,6 +84,25 @@ class boneToID(modTool):
         remapMeshBones(renameTable)
         return {'FINISHED'}  
 
+class boneToIndex(modTool):
+    bl_idname = 'mod_tools.bone_to_ix'
+    bl_label = "Rename Bones to Index"
+    bl_description = 'Renames every bone to their Order Index.'
+    bl_options = {"REGISTER", "PRESET", "UNDO"}    
+
+    def execute(self,context):
+        renameTable = {}
+        for bone in [o for o in bpy.context.scene.objects if o.type == "EMPTY" and "boneFunction" in o]:
+            if "indexHint" not in bone:
+                index = 1024
+            else:
+                index = bone["indexHint"]
+            newname = "Bone.%03d"%index
+            renameTable[bone .name] = newname 
+            bone.name = newname        
+        remapMeshBones(renameTable)
+        return {'FINISHED'}  
+
 class boneRename(modTool):
     bl_idname = 'mod_tools.bone_rename'
     bl_label = "Rename Bones"

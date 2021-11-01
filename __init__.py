@@ -30,7 +30,7 @@ from .operators.modtools import (massTriangulate,nukeWeights,limitWeights,
                                  cleanGroups,cleanColor,generateColor,setColour,
                                  solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
                                  targetArmature, targetEmpties, massWeight, collapseWeights,
-                                 boneRename, skeletonMerge, reindexMeshes,
+                                 boneRename, boneToIndex, skeletonMerge, reindexMeshes,
                                  cleanMaterials,cleanUVs)
 from .operators.rigtools import (getFPlayerRig, getMPlayerRig)
 from .operators.modtoolspanel import ModTools, ImportPremade
@@ -46,7 +46,7 @@ from .operators.selection import Selection
 classes = [Selection,
              massTriangulate,
              nukeWeights,limitWeights,cleanGroups,cleanColor,generateColor,setColour,
-             solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
+             solveUVSharp,solveUV,markUV,boneToID,boneToIndex,pasteProp,copyProp,
              targetArmature, targetEmpties, massWeight, collapseWeights,
              boneRename, skeletonMerge, reindexMeshes,
              cleanMaterials,cleanUVs,
