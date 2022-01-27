@@ -30,7 +30,7 @@ from .operators.modtools import (massTriangulate,nukeWeights,limitWeights,
                                  cleanGroups,cleanColor,generateColor,setColour,
                                  solveUVSharp,solveUV,markUV,boneToID,pasteProp,copyProp,
                                  targetArmature, targetEmpties, massWeight, collapseWeights,
-                                 boneRename, boneToIndex, skeletonMerge, reindexMeshes,
+                                 boneRename, boneToIndex, skeletonMerge, reindexMeshes,reindexBones,
                                  cleanMaterials,cleanUVs, weightDiscretization)
 from .operators.rigtools import (getFPlayerRig, getMPlayerRig)
 from .operators.modtoolspanel import ModTools, ImportPremade
@@ -48,7 +48,7 @@ classes = [Selection,
              nukeWeights,limitWeights,cleanGroups,cleanColor,generateColor,setColour,
              solveUVSharp,solveUV,markUV,boneToID,boneToIndex,pasteProp,copyProp,
              targetArmature, targetEmpties, massWeight, collapseWeights, weightDiscretization,
-             boneRename, skeletonMerge, reindexMeshes,
+             boneRename, skeletonMerge, reindexMeshes,reindexBones,
              cleanMaterials,cleanUVs,
              getFPlayerRig,getMPlayerRig,
              ModTools,ImportPremade,

@@ -101,7 +101,33 @@ class boneToIndex(modTool):
             renameTable[bone .name] = newname 
             bone.name = newname        
         remapMeshBones(renameTable)
-        return {'FINISHED'}  
+        return {'FINISHED'}
+
+class globalIndex():
+    def __init__(self):
+        self.i = 0
+    def increment(self):
+        self.i += 1
+    def get(self):
+        return self.i    
+
+class reindexBones(modTool):
+    bl_idname = 'mod_tools.reindex_bones'
+    bl_label = "Reindex Bones"
+    bl_description = 'Reindex Bones.'
+    bl_options = {"REGISTER", "PRESET", "UNDO"}    
+    
+    def execute(self,context):
+        obj = bpy.context.active_object
+        self.indexChildren(obj)
+        
+    def indexChildren(self,obj,gindex = None):
+        if gindex == None:
+            gindex = globalIndex()
+        obj["indexHint"] = gindex.get()
+        gindex.increment()
+        for c in obj.children:
+            self.indexChildren(c,gindex)
 
 class boneRename(modTool):
     bl_idname = 'mod_tools.bone_rename'
