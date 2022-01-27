@@ -75,6 +75,7 @@ class ModTools(bpy.types.Panel):
         
         col.operator("mod_tools.bone_to_id", icon='CONSTRAINT_BONE', text="Rename Bones to ID")
         col.operator("mod_tools.bone_to_ix", icon='CONSTRAINT_BONE', text="Rename Bones to Index")
+        col.operator("mod_tools.reindex_bones", icon='CONSTRAINT_BONE', text="Reindex Bones")
         col.operator("mod_tools.bone_rename", icon='CONSTRAINT_BONE', text="Rename Bones")
         col.operator("mod_tools.bone_merge", icon='CONSTRAINT_BONE', text="Merge Skeletons")
         

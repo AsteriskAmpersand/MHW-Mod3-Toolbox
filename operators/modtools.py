@@ -120,6 +120,7 @@ class reindexBones(modTool):
     def execute(self,context):
         obj = bpy.context.active_object
         self.indexChildren(obj)
+        return {'FINISHED'}
         
     def indexChildren(self,obj,gindex = None):
         if gindex == None:
@@ -307,6 +308,7 @@ class reindexMeshes(modTool):
         meshes = getSelection(self.limit_application)
         for ix,mesh in enumerate((m for m in meshes if "unknownIndex" in m.data)):
             mesh.data["unknownIndex"] = ix+1
+        return {'FINISHED'}
     
 def detectRepeatedUV(mesh):
     mesh = mesh.data
