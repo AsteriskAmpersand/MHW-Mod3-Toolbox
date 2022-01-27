@@ -692,7 +692,59 @@ class limitWeights(modTool):
         
         bpy.ops.object.mode_set(mode=oldmode)
         bpy.context.scene.objects.active = old_active
-        
+
+def walk_island(vert):
+    ''' walk all un-tagged linked verts '''    
+    vert.tag = True
+    yield(vert)
+    linked_verts = [e.other_vert(vert) for e in vert.link_edges
+            if not e.other_vert(vert).tag]
+    for v in linked_verts:
+        if v.tag:
+            continue
+        yield from walk_island(v)
+
+def get_islands(ob):
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    verts=bm.verts
+    def tag(verts, switch):
+        for v in verts:
+            v.tag = switch
+    tag(bm.verts, True)
+    tag(verts, False)
+    ret = {"islands" : []}
+    verts = set(verts)
+    while verts:
+        v = verts.pop()
+        verts.add(v)
+        island = set(walk_island(v))
+        ret["islands"].append(list(map(lambda vert: vert.index,island)))
+        tag(island, False) # remove tag = True
+        verts -= island
+    return ret["islands"]
+
+class weightDiscretization(bpy.types.Operator):
+    """Add a new item to the list."""
+    bl_idname = "mod_tools.componentwise_discretization"
+    bl_label = 'Average Weight per Island'
+    bl_description = "Discretize Weight Group per Selected Meshpart on Selected Mesh"
+    bl_options = {"REGISTER", "PRESET", "UNDO"}   
+    def execute(self, context):
+        ob = context.active_object
+        group = ob.vertex_groups.active_index        
+        components = [island for island in get_islands(ob)]
+        for component in components:
+            weightSum = 0
+            for vert in component:
+                try:
+                    weightSum += ob.vertex_groups[group].weight(vert)
+                except:
+                    pass
+            weightAvg = weightSum / len(component)
+            ob.vertex_groups[group].add(list(component), weightAvg, 'REPLACE')
+        return{'FINISHED'}
+
 class nukeWeights(modTool):
     bl_idname = 'mod_tools.nuke_weights'
     bl_label = "Remove all Vertex Groups"

@@ -91,6 +91,7 @@ class ModTools(bpy.types.Panel):
         col.operator("mod_tools.limit_normalize", icon='GROUP_VERTEX', text="Limit Weights to Label")
         col.operator("mod_tools.mass_weight", icon='GROUP_VERTEX', text="Mass Weight to Bone")
         col.operator("mod_tools.nuke_weights", icon='GROUP_VERTEX', text="Delete Weights")
+        col.operator("mod_tools.componentwise_discretization", icon='GROUP_VERTEX', text="Average Weight Islands")        
         col.operator("mod_tools.collapse_weights", icon='GROUP_VERTEX', text="Collapse Weights")
         col.operator('mod_tools.reindex_meshes', icon='GROUP_VERTEX', text="Reindex Meshes")
         col.operator("mod_tools.mass_triangulate", icon='GROUP_VERTEX', text="Triangulate")
