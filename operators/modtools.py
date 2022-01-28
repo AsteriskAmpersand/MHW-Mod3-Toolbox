@@ -127,7 +127,7 @@ class reindexBones(modTool):
             gindex = globalIndex()
         obj["indexHint"] = gindex.get()
         gindex.increment()
-        for c in obj.children:
+        for c in sorted(obj.children,key = lambda x: x.name):
             self.indexChildren(c,gindex)
 
 class boneRename(modTool):
