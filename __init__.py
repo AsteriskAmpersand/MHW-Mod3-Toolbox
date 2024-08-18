@@ -53,7 +53,7 @@ classes = [Selection,
              getFPlayerRig,getMPlayerRig,
              ModTools,ImportPremade,
              ModPrefs,
-             ImportPL,ExportPL,
+             #ImportPL,ExportPL,
            ]
 
 def register():
